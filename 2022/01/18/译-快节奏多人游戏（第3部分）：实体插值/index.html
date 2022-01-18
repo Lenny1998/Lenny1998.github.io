@@ -1,0 +1,157 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>(译)快节奏多人游戏（第3部分）：实体插值 | 天空之城</title><meta name="keywords" content="网络同步"><meta name="author" content="April"><meta name="copyright" content="April"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="简介在本系列的第一篇文章中，我们介绍了权威服务器的概念以及在防止客户端作弊方面的作用。然而，天真地使用这种技术可能会导致关于可玩性和响应性的潜在问题。在第二篇文章中，我们提出了客户端预测作为克服这些限制的一种方法。这两篇文章的最终结果是一组概念和技术，允许玩家以一种感觉完全像单人游戏的方式控制游戏中的角色，即使是通过互联网连接到权威服务器。在本文中，我们将探讨将其他玩家控制的角色连接到同一服务器的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="(译)快节奏多人游戏（第3部分）：实体插值">
+<meta property="og:url" content="http://lenny1998.github.io/2022/01/18/%E8%AF%91-%E5%BF%AB%E8%8A%82%E5%A5%8F%E5%A4%9A%E4%BA%BA%E6%B8%B8%E6%88%8F%EF%BC%88%E7%AC%AC3%E9%83%A8%E5%88%86%EF%BC%89%EF%BC%9A%E5%AE%9E%E4%BD%93%E6%8F%92%E5%80%BC/index.html">
+<meta property="og:site_name" content="天空之城">
+<meta property="og:description" content="简介在本系列的第一篇文章中，我们介绍了权威服务器的概念以及在防止客户端作弊方面的作用。然而，天真地使用这种技术可能会导致关于可玩性和响应性的潜在问题。在第二篇文章中，我们提出了客户端预测作为克服这些限制的一种方法。这两篇文章的最终结果是一组概念和技术，允许玩家以一种感觉完全像单人游戏的方式控制游戏中的角色，即使是通过互联网连接到权威服务器。在本文中，我们将探讨将其他玩家控制的角色连接到同一服务器的">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">
+<meta property="article:published_time" content="2022-01-18T12:10:47.000Z">
+<meta property="article:modified_time" content="2022-01-18T12:13:06.873Z">
+<meta property="article:author" content="April">
+<meta property="article:tag" content="网络同步">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://lenny1998.github.io/2022/01/18/%E8%AF%91-%E5%BF%AB%E8%8A%82%E5%A5%8F%E5%A4%9A%E4%BA%BA%E6%B8%B8%E6%88%8F%EF%BC%88%E7%AC%AC3%E9%83%A8%E5%88%86%EF%BC%89%EF%BC%9A%E5%AE%9E%E4%BD%93%E6%8F%92%E5%80%BC/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '(译)快节奏多人游戏（第3部分）：实体插值',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-01-18 20:13:06'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.0.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data is-center"><div class="data-item"><a href="/archives/"><div class="headline">文章</div><div class="length-num">4</div></a></div><div class="data-item"><a href="/tags/"><div class="headline">标签</div><div class="length-num">1</div></a></div><div class="data-item"><a href="/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">天空之城</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">(译)快节奏多人游戏（第3部分）：实体插值</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2022-01-18T12:10:47.000Z" title="发表于 2022-01-18 20:10:47">2022-01-18</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-01-18T12:13:06.873Z" title="更新于 2022-01-18 20:13:06">2022-01-18</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="(译)快节奏多人游戏（第3部分）：实体插值"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a><u>简介</u></h3><p>在本系列的第一篇文章中，我们介绍了权威服务器的概念以及在防止客户端作弊方面的作用。然而，天真地使用这种技术可能会导致关于可玩性和响应性的潜在问题。在第二篇文章中，我们提出了客户端预测作为克服这些限制的一种方法。<br>这两篇文章的最终结果是一组概念和技术，允许玩家以一种感觉完全像单人游戏的方式控制游戏中的角色，即使是通过互联网连接到权威服务器。<br>在本文中，我们将探讨将其他玩家控制的角色连接到同一服务器的情况。</p>
+<h3 id="服务器时间步长"><a href="#服务器时间步长" class="headerlink" title="服务器时间步长"></a><u>服务器时间步长</u></h3><p>在上一篇文章中，我们描述的服务器的行为非常简单——它读取客户端输入，更新游戏状态，并将其发送回客户端。但是，当连接了多个客户端时，主服务器循环会有所不同。<br>在这种情况下，多个客户端可能会同时发送输入，并且速度很快（玩家可以发出命令，无论是按下箭头键、移动鼠标还是点击屏幕）。每次从每个客户端接收输入、更新游戏世界然后再广播游戏状态会消耗过多的 CPU 和带宽。<br>更好的方法是在接收到客户端输入时对其进行排队，而不进行任何处理。相反，游戏世界以低频率定期更新，例如每秒 10 次。每次更新之间的延迟，在这种情况下为 100 毫秒，称为时间步长。在每次更新循环迭代中，应用所有未处理的客户端输入（可能以比时间步长更小的时间增量，以使物理更可预测），并将新的游戏状态广播给客户端。<br>总之，游戏世界独立于客户端输入的存在和数量并且以可预测的速度进行更新。</p>
+<h3 id="处理低频更新"><a href="#处理低频更新" class="headerlink" title="处理低频更新"></a><u>处理低频更新</u></h3><p>从客户端的角度来看，这种方法和以前一样顺利——客户端独立于更新延迟进行预测，所以如果状态的更新并不频繁，显然也是可预测的。然而，由于游戏状态以低频率广播（继续示例，每 100 毫秒），对于世界各地移动的其他实体，客户端拥有的信息非常稀少。<br>第一种实现是在接收到状态更新时更新其他玩家的位置；这会立即导致非常不稳定的运动，即每 100 毫秒的离散跳跃，而不是平滑的运动。</p>
+<img src="/2022/01/18/%E8%AF%91-%E5%BF%AB%E8%8A%82%E5%A5%8F%E5%A4%9A%E4%BA%BA%E6%B8%B8%E6%88%8F%EF%BC%88%E7%AC%AC3%E9%83%A8%E5%88%86%EF%BC%89%EF%BC%9A%E5%AE%9E%E4%BD%93%E6%8F%92%E5%80%BC/image-20220117104905505.png" alt="image-20220117104905505" style="zoom:50%;">
+
+<p>根据您正在开发的游戏类型，有很多方法可以解决这个问题；通常，您的游戏实体越可预测，就越容易正确处理。</p>
+<h3 id="航位推测（Dead-reckoning）"><a href="#航位推测（Dead-reckoning）" class="headerlink" title="航位推测（Dead reckoning）"></a>航位推测（Dead reckoning）</h3><p>假设你正在制作一款赛车游戏。一辆跑得非常快的汽车是可以预测的——例如，如果它以每秒 100 米的速度行驶，一秒钟后它将比它开始的地方提前大约 100 米。<br>为什么是“大约”？在那一秒钟内，汽车可能会稍微加速或减速，或者向右或向左转一点——这里的关键词是“一点”。汽车的机动性是这样的，在高速行驶时，它在任何时间点的位置都高度依赖于它之前的位置、速度和方向，而不管玩家实际做了什么。换句话说，赛车不能立即进行 180 度转弯。<br>这如何与每 100 毫秒发送一次更新的服务器一起工作？客户端收到权威的速度和每辆竞争汽车航向；在接下来的 100 毫秒内，它不会收到任何新信息，但仍需要显示它们正在运行。最简单的做法是假设汽车的航向和加速度在这 100 毫秒内保持不变，并使用该参数在本地使骑车保持物理移动。然后，100 毫秒后，当服务器更新到达时，汽车的位置被修正。<br>取决于许多因素，修正可以很大或相对较小。如果玩家确实将汽车保持在一条直线上并且不改变汽车速度，则预测位置将与修正位置完全相同。另一方面，如果玩家撞到什么东西，预测的位置将是非常错误的。<br>请注意，航位推算可以应用于低速情况——例如战舰。事实上，“航位推算”一词起源于海上航行。</p>
+<h3 id="实体差值"><a href="#实体差值" class="headerlink" title="实体差值"></a><u>实体差值</u></h3><p>在某些情况下根本无法应用航位推算——尤其是所有玩家的方向和速度可以立即改变的情况。例如，在 3D 射击游戏中，玩家通常以非常高的速度奔跑、停止和转弯，这使得航位推算基本上没有用，因为无法再从以前的数据中预测位置和速度。<br>当服务器发送权威数据时，您不能只更新玩家位置；不然的话你会看到别的玩家每 100 毫秒进行一次短距离跳跃（瞬移），使游戏无法玩。<br>您所拥有的是每 100 毫秒的权威位置数据；诀窍是如何向玩家展示中间发生的事情。解决方案的关键是对用户的玩家显示过去的其他玩家。<br>假设您在 t = 1000 接收到位置数据。您已经在 t = 900 接收到数据，因此您知道玩家在 t = 900 和 t = 1000 时的位置。因此，从 t = 1000 和 t = 1100，你显示另一个玩家从 t = 900 到 t = 1000。这样你总是向用户显示实际的移动数据，除非你“延迟”了 100 毫秒。</p>
+<p><img src="/2022/01/18/%E8%AF%91-%E5%BF%AB%E8%8A%82%E5%A5%8F%E5%A4%9A%E4%BA%BA%E6%B8%B8%E6%88%8F%EF%BC%88%E7%AC%AC3%E9%83%A8%E5%88%86%EF%BC%89%EF%BC%9A%E5%AE%9E%E4%BD%93%E6%8F%92%E5%80%BC/image-20220117104938183.png" alt="image-20220117104938183"></p>
+<p>您用于从 t = 900 内差值到 t = 1000 的位置数据取决于游戏。插值通常工作得很好。如果没有，您可以让服务器在每次更新时发送更详细的移动数据——例如，玩家跟随的一系列直线段，或者每 10 毫秒采样一次的位置，让插值看起来更好（您不需要发送 10 倍以上的数据——由于您要发送小动作的增量，因此可以针对这种特殊情况对线路上的格式进行大量优化）。<br>请注意，使用这种技术，每个玩家看到的游戏世界渲染略有不同，因为每个玩家看到的是现在的自己，但看到的是过去的其他实体。然而，即使对于快节奏的游戏，看到其他 100 毫秒的实体通常也不会很明显。<br>也有例外——当您需要大量的空间和时间准确性时，例如当玩家向另一名玩家射击时。由于过去看到了其他玩家，因此您的瞄准有 100 毫秒的延迟——也就是说，您正在射击 100 毫秒前的目标！我们将在下一篇文章中处理这个问题。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a><u>总结</u></h2><p>在具有权威服务器、不频繁更新和网络延迟的客户端-服务器环境中，您仍然必须给玩家一种连续性和流畅运动的错觉。在本系列的第 2 部分中，我们探索了一种使用客户端预测和服务器协调来实时显示用户控制的玩家移动的方法；这确保了用户输入对本地玩家有直接影响，消除了导致游戏无法玩的延迟。<br>然而，其他实体仍然是一个问题。在本文中，我们探讨了两种处理它们的方法。<br>第一个，航位推算，适用于某些类型的模拟，例如可以从先前的实体数据（例如位置、速度和加速度）中估计实体位置。如果不满足这些条件，这种方法就会失败。<br>第二个，实体插值，根本不预测未来的位置——它只使用服务器提供的真实实体数据，因此显示其他实体在时间上略有延迟。最终效果是用户的玩家在现在被看到，而只能看到过去的其他实体。这通常会产生不好的体验。<br>然而，如果什么都不做，当事件需要高空间和时间精度时，这种错觉就会崩溃，例如向移动目标射击：客户端 2 呈现客户端 1 的位置与服务器和客户端 1 的位置不匹配，所以爆头变得不可能！由于没有爆头的游戏是不完整的，我们将在下一篇文章中处理这个问题。</p>
+<p><a target="_blank" rel="noopener" href="https://www.gabrielgambetta.com/entity-interpolation.html">原文连接</a></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">April</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://lenny1998.github.io/2022/01/18/%E8%AF%91-%E5%BF%AB%E8%8A%82%E5%A5%8F%E5%A4%9A%E4%BA%BA%E6%B8%B8%E6%88%8F%EF%BC%88%E7%AC%AC3%E9%83%A8%E5%88%86%EF%BC%89%EF%BC%9A%E5%AE%9E%E4%BD%93%E6%8F%92%E5%80%BC/">http://lenny1998.github.io/2022/01/18/%E8%AF%91-%E5%BF%AB%E8%8A%82%E5%A5%8F%E5%A4%9A%E4%BA%BA%E6%B8%B8%E6%88%8F%EF%BC%88%E7%AC%AC3%E9%83%A8%E5%88%86%EF%BC%89%EF%BC%9A%E5%AE%9E%E4%BD%93%E6%8F%92%E5%80%BC/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://Lenny1998.github.io" target="_blank">天空之城</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%BD%91%E7%BB%9C%E5%90%8C%E6%AD%A5/">网络同步</a></div><div class="post_share"><div class="social-share" data-image="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2022/01/18/%E8%AF%91-%E5%BF%AB%E8%8A%82%E5%A5%8F%E5%A4%9A%E4%BA%BA%E6%B8%B8%E6%88%8F%EF%BC%88%E7%AC%AC4%E9%83%A8%E5%88%86%EF%BC%89%EF%BC%9A%E5%BB%B6%E8%BF%9F%E8%A1%A5%E5%81%BF/"><img class="prev-cover" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">(译)快节奏多人游戏（第4部分）：延迟补偿</div></div></a></div><div class="next-post pull-right"><a href="/2022/01/18/%E8%AF%91-%E5%BF%AB%E8%8A%82%E5%A5%8F%E5%A4%9A%E4%BA%BA%E6%B8%B8%E6%88%8F%EF%BC%88%E7%AC%AC2%E9%83%A8%E5%88%86%EF%BC%89%EF%BC%9A%E5%AE%A2%E6%88%B7%E7%AB%AF%E9%A2%84%E6%B5%8B%E5%92%8C%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%8D%8F%E8%B0%83/"><img class="next-cover" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">(译)快节奏多人游戏（第2部分）：客户端预测和服务器协调</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2022/01/17/%E8%AF%91-%E5%BF%AB%E8%8A%82%E5%A5%8F%E5%A4%9A%E4%BA%BA%E6%B8%B8%E6%88%8F%EF%BC%88%E7%AC%AC1%E9%83%A8%E5%88%86%EF%BC%89%EF%BC%9A%E5%AE%A2%E6%88%B7%E7%AB%AF-%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%B8%B8%E6%88%8F%E6%9E%B6%E6%9E%84/" title="(译)快节奏多人游戏（第1部分）：客户端 - 服务器游戏架构"><img class="cover" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-01-17</div><div class="title">(译)快节奏多人游戏（第1部分）：客户端 - 服务器游戏架构</div></div></a></div><div><a href="/2022/01/18/%E8%AF%91-%E5%BF%AB%E8%8A%82%E5%A5%8F%E5%A4%9A%E4%BA%BA%E6%B8%B8%E6%88%8F%EF%BC%88%E7%AC%AC2%E9%83%A8%E5%88%86%EF%BC%89%EF%BC%9A%E5%AE%A2%E6%88%B7%E7%AB%AF%E9%A2%84%E6%B5%8B%E5%92%8C%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%8D%8F%E8%B0%83/" title="(译)快节奏多人游戏（第2部分）：客户端预测和服务器协调"><img class="cover" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-01-18</div><div class="title">(译)快节奏多人游戏（第2部分）：客户端预测和服务器协调</div></div></a></div><div><a href="/2022/01/18/%E8%AF%91-%E5%BF%AB%E8%8A%82%E5%A5%8F%E5%A4%9A%E4%BA%BA%E6%B8%B8%E6%88%8F%EF%BC%88%E7%AC%AC4%E9%83%A8%E5%88%86%EF%BC%89%EF%BC%9A%E5%BB%B6%E8%BF%9F%E8%A1%A5%E5%81%BF/" title="(译)快节奏多人游戏（第4部分）：延迟补偿"><img class="cover" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-01-18</div><div class="title">(译)快节奏多人游戏（第4部分）：延迟补偿</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">April</div><div class="author-info__description"></div></div><div class="card-info-data is-center"><div class="card-info-data-item"><a href="/archives/"><div class="headline">文章</div><div class="length-num">4</div></a></div><div class="card-info-data-item"><a href="/tags/"><div class="headline">标签</div><div class="length-num">1</div></a></div><div class="card-info-data-item"><a href="/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AE%80%E4%BB%8B"><span class="toc-number">1.</span> <span class="toc-text">简介</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%97%B6%E9%97%B4%E6%AD%A5%E9%95%BF"><span class="toc-number">2.</span> <span class="toc-text">服务器时间步长</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A4%84%E7%90%86%E4%BD%8E%E9%A2%91%E6%9B%B4%E6%96%B0"><span class="toc-number">3.</span> <span class="toc-text">处理低频更新</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%88%AA%E4%BD%8D%E6%8E%A8%E6%B5%8B%EF%BC%88Dead-reckoning%EF%BC%89"><span class="toc-number">4.</span> <span class="toc-text">航位推测（Dead reckoning）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E4%BD%93%E5%B7%AE%E5%80%BC"><span class="toc-number">5.</span> <span class="toc-text">实体差值</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number"></span> <span class="toc-text">总结</span></a></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2022/01/18/%E8%AF%91-%E5%BF%AB%E8%8A%82%E5%A5%8F%E5%A4%9A%E4%BA%BA%E6%B8%B8%E6%88%8F%EF%BC%88%E7%AC%AC4%E9%83%A8%E5%88%86%EF%BC%89%EF%BC%9A%E5%BB%B6%E8%BF%9F%E8%A1%A5%E5%81%BF/" title="(译)快节奏多人游戏（第4部分）：延迟补偿">(译)快节奏多人游戏（第4部分）：延迟补偿</a><time datetime="2022-01-18T12:14:08.000Z" title="发表于 2022-01-18 20:14:08">2022-01-18</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2022/01/18/%E8%AF%91-%E5%BF%AB%E8%8A%82%E5%A5%8F%E5%A4%9A%E4%BA%BA%E6%B8%B8%E6%88%8F%EF%BC%88%E7%AC%AC3%E9%83%A8%E5%88%86%EF%BC%89%EF%BC%9A%E5%AE%9E%E4%BD%93%E6%8F%92%E5%80%BC/" title="(译)快节奏多人游戏（第3部分）：实体插值">(译)快节奏多人游戏（第3部分）：实体插值</a><time datetime="2022-01-18T12:10:47.000Z" title="发表于 2022-01-18 20:10:47">2022-01-18</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2022/01/18/%E8%AF%91-%E5%BF%AB%E8%8A%82%E5%A5%8F%E5%A4%9A%E4%BA%BA%E6%B8%B8%E6%88%8F%EF%BC%88%E7%AC%AC2%E9%83%A8%E5%88%86%EF%BC%89%EF%BC%9A%E5%AE%A2%E6%88%B7%E7%AB%AF%E9%A2%84%E6%B5%8B%E5%92%8C%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%8D%8F%E8%B0%83/" title="(译)快节奏多人游戏（第2部分）：客户端预测和服务器协调">(译)快节奏多人游戏（第2部分）：客户端预测和服务器协调</a><time datetime="2022-01-18T12:00:58.000Z" title="发表于 2022-01-18 20:00:58">2022-01-18</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2022/01/17/%E8%AF%91-%E5%BF%AB%E8%8A%82%E5%A5%8F%E5%A4%9A%E4%BA%BA%E6%B8%B8%E6%88%8F%EF%BC%88%E7%AC%AC1%E9%83%A8%E5%88%86%EF%BC%89%EF%BC%9A%E5%AE%A2%E6%88%B7%E7%AB%AF-%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%B8%B8%E6%88%8F%E6%9E%B6%E6%9E%84/" title="(译)快节奏多人游戏（第1部分）：客户端 - 服务器游戏架构">(译)快节奏多人游戏（第1部分）：客户端 - 服务器游戏架构</a><time datetime="2022-01-17T11:42:51.000Z" title="发表于 2022-01-17 19:42:51">2022-01-17</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2022 By April</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
